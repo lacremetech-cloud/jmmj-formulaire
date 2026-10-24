@@ -7,7 +7,7 @@ Formulaire mobile (QR code) + interface admin, stockage dans Supabase (projet pr
 - `config.js` : URL et clé publique Supabase
 - `supabase/migrations/` : schéma `formulaire_jmmj` (table `reponses`) et fonctions `public.jmmj_*`
 - `google-sheets/Code.gs` : synchronisation vers Google Sheets (Apps Script, solution de secours)
-- `assets/qr-code-formulaire.png` : QR code vers le formulaire
+- `assets/qr-code-vercel.png` : QR code vers https://jmmj-formulaire.vercel.app/ (et `assets/qr-code-formulaire.png` vers GitHub Pages)
 
 ## Sécurité
 
