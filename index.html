@@ -53,9 +53,8 @@
         <label for="email">E-mail</label>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m22 7-10 6L2 7"/></svg>
       </div>
-      <p class="note">Téléphone ou e-mail : au moins l'un des deux.</p>
 
-      <div class="sub-label">Date de naissance <span>facultatif</span></div>
+      <div class="sub-label">Date de naissance</div>
       <div class="dob" id="dob">
         <input id="dob_d" inputmode="numeric" maxlength="2" placeholder="JJ" aria-label="Jour">
         <input id="dob_m" inputmode="numeric" maxlength="2" placeholder="MM" aria-label="Mois">
@@ -208,10 +207,10 @@ function readDob() {
 function validateStep1() {
   const nom = $("nom_prenom").value.trim(), tel = $("telephone").value.trim(), email = $("email").value.trim();
   if (nom.length < 2) return showError("Indiquez votre nom et prénom.", $("f-nom")), false;
-  if (!tel && !email) return showError("Indiquez un téléphone ou un e-mail.", $("f-tel")), false;
-  if (tel && tel.replace(/\D/g, "").length < 8) return showError("Le numéro de téléphone semble incomplet.", $("f-tel")), false;
-  if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showError("L'adresse e-mail semble incorrecte.", $("f-email")), false;
-  if (readDob().error) return showError("Date de naissance incorrecte (JJ / MM / AAAA).", $("dob")), false;
+  if (tel.replace(/\D/g, "").length < 8) return showError(tel ? "Le numéro de téléphone semble incomplet." : "Indiquez votre numéro de téléphone.", $("f-tel")), false;
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showError(email ? "L'adresse e-mail semble incorrecte." : "Indiquez votre adresse e-mail.", $("f-email")), false;
+  const birth = readDob();
+  if (birth.error || !birth.value) return showError(birth.error ? "Date de naissance incorrecte (JJ / MM / AAAA)." : "Indiquez votre date de naissance.", $("dob")), false;
   return true;
 }
 

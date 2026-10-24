@@ -8,15 +8,14 @@ create table formulaire_jmmj.reponses (
   id              uuid primary key default gen_random_uuid(),
   created_at      timestamptz not null default now(),
   nom_prenom      text not null check (length(btrim(nom_prenom)) between 2 and 200),
-  telephone       text check (telephone is null or length(telephone) <= 40),
-  email           text check (email is null or (length(email) <= 254 and email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$')),
-  date_naissance  date check (date_naissance is null or date_naissance between '1900-01-01' and current_date),
+  telephone       text not null check (length(telephone) between 8 and 40),
+  email           text not null check (length(email) <= 254 and email ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$'),
+  date_naissance  date not null check (date_naissance between '1900-01-01' and current_date),
   pour_vous       text[] not null default '{}',
   pour_proches    text[] not null default '{}',
   recontact       boolean not null,
   message         text check (message is null or length(message) <= 2000),
-  evenement       text not null default 'World Café',
-  constraint reponses_contact_requis check (telephone is not null or email is not null)
+  evenement       text not null default 'World Café'
 );
 comment on table formulaire_jmmj.reponses is 'Réponses au formulaire JMMJ (QR code conférence). Écriture via public.jmmj_submit, lecture via public.jmmj_admin_list (code admin).';
 alter table formulaire_jmmj.reponses enable row level security;
