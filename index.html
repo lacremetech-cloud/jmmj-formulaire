@@ -96,6 +96,12 @@
         <div class="done-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
         <h2>Merci <span id="done-name"></span> !</h2>
         <p id="done-text">Vos informations sont bien enregistrées. Votre quête du savoir continue avec nous : à très bientôt.</p>
+        <div class="refer">
+          <div class="refer-icon">🤝</div>
+          <b>Vous connaissez quelqu'un que ça pourrait intéresser ?</b>
+          <p>Un proche, un ami, un membre de votre famille : remplissez le formulaire pour lui en quelques secondes.</p>
+          <button type="button" class="btn" id="again">Remplir pour un proche</button>
+        </div>
       </div>
     </section>
 
@@ -285,6 +291,19 @@ async function submit() {
   }
 }
 
+
+$("again").addEventListener("click", () => {
+  ["nom_prenom", "telephone", "email", "message"].forEach((id) => ($(id).value = ""));
+  $("message-count").textContent = "0 / 2000";
+  $("message").style.height = "";
+  dob.forEach((i) => (i.value = ""));
+  state.interets.clear();
+  state.recontact = null;
+  document.querySelectorAll(".offer").forEach((o) => o.setAttribute("aria-pressed", "false"));
+  document.querySelectorAll(".yn").forEach((x) => x.setAttribute("aria-checked", "false"));
+  go(1, true);
+  $("nom_prenom").focus();
+});
 </script>
 </body>
 </html>
