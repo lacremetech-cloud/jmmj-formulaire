@@ -14,6 +14,7 @@ create table formulaire_jmmj.reponses (
   pour_vous       text[] not null default '{}',
   pour_proches    text[] not null default '{}',
   recontact       boolean not null,
+  message         text check (message is null or length(message) <= 2000),
   evenement       text not null default 'World Café',
   constraint reponses_contact_requis check (telephone is not null or email is not null)
 );
@@ -62,7 +63,7 @@ begin
     raise exception 'recontact_requis' using errcode = '22023';
   end if;
   insert into formulaire_jmmj.reponses
-    (nom_prenom, telephone, email, date_naissance, pour_vous, pour_proches, recontact)
+    (nom_prenom, telephone, email, date_naissance, pour_vous, pour_proches, recontact, message)
   values (
     btrim(payload->>'nom_prenom'),
     v_tel,
@@ -70,7 +71,8 @@ begin
     nullif(payload->>'date_naissance', '')::date,
     formulaire_jmmj.clean_choices(payload->'pour_vous'),
     formulaire_jmmj.clean_choices(payload->'pour_proches'),
-    (payload->>'recontact')::boolean
+    (payload->>'recontact')::boolean,
+    nullif(left(btrim(coalesce(payload->>'message', '')), 2000), '')
   )
   returning id into v_id;
   return v_id;

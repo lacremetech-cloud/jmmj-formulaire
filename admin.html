@@ -38,6 +38,7 @@
     .pill { flex: none; font-weight: 700; font-size: 11.5px; padding: 4px 9px; border-radius: 8px; }
     .pill.yes { background: #e2f6ec; color: var(--ok); }
     .pill.no { background: var(--field); color: var(--muted); }
+    .msg { margin-top: 4px; padding: 10px 12px; border-radius: 12px; background: var(--field); white-space: pre-wrap; word-break: break-word; }
     .del { background: none; border: 0; color: var(--muted); font-size: 12px; text-decoration: underline; cursor: pointer; padding: 0; margin-top: 10px; }
     .empty { text-align: center; color: var(--muted); padding: 40px 0; grid-column: 1 / -1; }
     .label-sm { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-top: 10px; }
@@ -131,7 +132,7 @@ async function load(code) {
 
 function render() {
   const q = $("search").value.trim().toLowerCase();
-  const shown = rows.filter((r) => !q || [r.nom_prenom, r.telephone, r.email].join(" ").toLowerCase().includes(q));
+  const shown = rows.filter((r) => !q || [r.nom_prenom, r.telephone, r.email, r.message].join(" ").toLowerCase().includes(q));
 
   const count = (group, key) => rows.filter((r) => r[group].includes(key)).length;
   $("stats").innerHTML = [
@@ -159,16 +160,17 @@ function render() {
       </div>
       ${r.pour_vous.length ? `<div class="label-sm">Pour soi</div><div class="tags">${labels(r.pour_vous).map((l) => `<span class="tag">${esc(l)}</span>`).join("")}</div>` : ""}
       ${r.pour_proches.length ? `<div class="label-sm">Pour ses proches</div><div class="tags">${labels(r.pour_proches).map((l) => `<span class="tag red">${esc(l)}</span>`).join("")}</div>` : ""}
+      ${r.message ? `<div class="label-sm">Message</div><div class="msg">${esc(r.message)}</div>` : ""}
       <button class="del" data-id="${esc(r.id)}" data-name="${esc(r.nom_prenom)}">Supprimer</button>
     </div>`).join("");
 }
 
 function exportCsv() {
-  const head = ["Date", "Nom Prénom", "Téléphone", "E-mail", "Date de naissance", "Pour soi", "Pour ses proches", "Recontact"];
+  const head = ["Date", "Nom Prénom", "Téléphone", "E-mail", "Date de naissance", "Pour soi", "Pour ses proches", "Recontact", "Message"];
   const cell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
   const lines = [...rows].reverse().map((r) => [
     fmtDate(r.created_at), r.nom_prenom, r.telephone, r.email, fmtBirth(r.date_naissance),
-    labels(r.pour_vous).join(" | "), labels(r.pour_proches).join(" | "), r.recontact ? "OUI" : "NON",
+    labels(r.pour_vous).join(" | "), labels(r.pour_proches).join(" | "), r.recontact ? "OUI" : "NON", r.message,
   ].map(cell).join(";"));
   // BOM + « ; » : s'ouvre directement avec les accents dans Excel (FR)
   const blob = new Blob(["﻿" + [head.map(cell).join(";"), ...lines].join("\r\n")], { type: "text/csv;charset=utf-8" });

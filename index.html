@@ -82,6 +82,11 @@
           <span class="emoji">🙂</span><span><b>Non, pas pour l'instant</b><small>Je garde simplement le contact</small></span><span class="radio"></span>
         </button>
       </div>
+      <div class="sub-label" style="margin-top:22px">Un mot à nous partager ? <span>facultatif</span></div>
+      <div class="textarea">
+        <textarea id="message" rows="4" maxlength="2000" placeholder="Une question, une remarque, un besoin particulier…"></textarea>
+        <small id="message-count">0 / 2000</small>
+      </div>
       <div class="recap" id="recap"></div>
       <p class="consent">Vos informations sont utilisées uniquement par l'association JMMJ pour vous recontacter au sujet de ses activités. Elles ne sont jamais transmises à des tiers et vous pouvez demander leur suppression à tout moment.</p>
     </section>
@@ -171,6 +176,12 @@ dob.forEach((input, i) => input.addEventListener("input", () => {
   input.value = input.value.replace(/\D/g, "");
   if (input.value.length === input.maxLength && dob[i + 1]) dob[i + 1].focus();
 }));
+const message = $("message");
+message.addEventListener("input", () => {
+  $("message-count").textContent = `${message.value.length} / 2000`;
+  message.style.height = "auto";
+  message.style.height = message.scrollHeight + 2 + "px";
+});
 // Touche « suivant » du clavier mobile
 ["nom_prenom", "telephone", "email"].forEach((id, i, arr) => $(id).addEventListener("keydown", (e) => {
   if (e.key === "Enter") { e.preventDefault(); (arr[i + 1] ? $(arr[i + 1]) : dob[0]).focus(); }
@@ -258,6 +269,7 @@ async function submit() {
     pour_vous: [...state.pour_vous],
     pour_proches: [...state.pour_proches],
     recontact: state.recontact,
+    message: $("message").value.trim(),
   };
   const btn = $("next");
   const label = btn.innerHTML;
@@ -283,7 +295,8 @@ async function submit() {
 }
 
 $("again").addEventListener("click", () => {
-  ["nom_prenom", "telephone", "email"].forEach((id) => ($(id).value = ""));
+  ["nom_prenom", "telephone", "email", "message"].forEach((id) => ($(id).value = ""));
+  $("message-count").textContent = "0 / 2000";
   dob.forEach((i) => (i.value = ""));
   state.pour_vous.clear(); state.pour_proches.clear(); state.recontact = null;
   document.querySelectorAll(".toggle").forEach((t) => t.setAttribute("aria-pressed", "false"));

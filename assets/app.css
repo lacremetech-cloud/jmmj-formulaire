@@ -254,3 +254,16 @@ button { font: inherit; color: inherit; }
 body.compact .hero { padding-bottom: 70px; }
 body.compact .hero .eyebrow, body.compact .hero p { display: none; }
 body.compact .hero h1 { font-size: 22px; margin-top: 16px; }
+
+/* Champ libre */
+.textarea { position: relative; }
+.textarea textarea {
+  display: block; width: 100%; min-height: 112px; resize: none;
+  padding: 14px 16px 28px;
+  font: inherit; font-size: 16px; line-height: 1.5; color: var(--ink);
+  background: var(--field); border: 1.5px solid transparent; border-radius: 14px; outline: none;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+.textarea textarea::placeholder { color: #a3a6ba; }
+.textarea textarea:focus { background: #fff; border-color: var(--navy); box-shadow: 0 0 0 4px rgba(34, 34, 90, 0.08); }
+.textarea small { position: absolute; right: 12px; bottom: 8px; font-size: 11px; color: #a3a6ba; }
