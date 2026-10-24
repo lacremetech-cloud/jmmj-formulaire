@@ -3,7 +3,7 @@
 Formulaire mobile (QR code) + interface admin, stockage dans Supabase (projet prodigio-os, schéma séparé `formulaire_jmmj`).
 
 - `index.html` : formulaire public — https://lacremetech-cloud.github.io/jmmj-formulaire/
-- `admin.html` : réponses, recherche, export CSV (protégé par code) — https://lacremetech-cloud.github.io/jmmj-formulaire/admin.html
+- `admin.html` : réponses, recherche, export CSV (protégé par code) — https://lacremetech-cloud.github.io/jmmj-formulaire/admin
 - `config.js` : URL et clé publique Supabase
 - `supabase/migrations/` : schéma `formulaire_jmmj` (table `reponses`) et fonctions `public.jmmj_*`
 - `api/sheet.js` : export CSV pour Google Sheets (`=IMPORTDATA(".../api/sheet?token=…")`)
