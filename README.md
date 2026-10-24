@@ -1,6 +1,6 @@
 # Formulaire JMMJ — World Café
 
-Formulaire mobile (QR code) + interface admin, stockage dans Supabase (projet Sista Scale).
+Formulaire mobile (QR code) + interface admin, stockage dans Supabase (projet prodigio-os, schéma séparé `formulaire_jmmj`).
 
 - `index.html` : formulaire public — https://lacremetech-cloud.github.io/jmmj-formulaire/
 - `admin.html` : réponses, recherche, export CSV (protégé par code) — https://lacremetech-cloud.github.io/jmmj-formulaire/admin.html

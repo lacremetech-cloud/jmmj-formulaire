@@ -3,8 +3,8 @@
 // 2. Exécutez une fois installerSynchro() et acceptez les autorisations.
 // La feuille se met ensuite à jour toutes les 5 minutes.
 
-const SUPABASE_URL = 'https://feuwresdqggpdnnlzkvu.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_Vi9pHAT6M520Tqf5xMcJmQ_oCpn9UE6';
+const SUPABASE_URL = 'https://wmhrpweefutwldbhllhg.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_wJ1l9a0Iz5S-U-cguQx92Q_2DFTp939';
 const SHEET_TOKEN = 'COLLER_ICI_LE_JETON';
 const ONGLET = 'Réponses';
 
