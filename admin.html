@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#24245c">
+  <meta name="robots" content="noindex">
+  <title>Admin JMMJ</title>
+  <link rel="icon" href="assets/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .page { max-width: 1100px; }
+    .wrap { padding: 18px 16px 32px; }
+    .login { max-width: 380px; margin: 40px auto; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+    .toolbar input { flex: 1 1 220px; }
+    .toolbar .btn { width: auto; margin: 0; padding: 12px 18px; font-size: 15px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 18px; }
+    .stat { background: var(--bg); border-radius: 10px; padding: 12px 14px; }
+    .stat b { display: block; font-size: 24px; color: var(--navy); }
+    .stat span { font-size: 13px; color: var(--muted); }
+    .list { display: grid; gap: 10px; }
+    .card { border: 1px solid var(--grey); border-radius: 10px; padding: 14px; font-size: 14px; line-height: 1.5; }
+    .card-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+    .card-head b { font-size: 16px; }
+    .card-head time { color: var(--muted); font-size: 12px; }
+    .card a { color: var(--navy); }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .tag { background: #ececf6; color: var(--navy); border-radius: 999px; padding: 2px 10px; font-size: 12px; }
+    .tag.red { background: #fde9e7; color: #a3271f; }
+    .pill { font-weight: 600; font-size: 12px; padding: 2px 8px; border-radius: 6px; }
+    .pill.yes { background: #e3f4ea; color: var(--ok); }
+    .pill.no { background: var(--grey); color: var(--muted); }
+    .del { background: none; border: 0; color: var(--muted); font: inherit; font-size: 12px; text-decoration: underline; cursor: pointer; padding: 0; margin-top: 8px; }
+    .empty { text-align: center; color: var(--muted); padding: 40px 0; }
+    .label-sm { font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+<div class="page">
+  <header class="header">
+    <div class="header-title">
+      <h1><span class="red">ADMIN</span> JMMJ</h1>
+      <div class="rule"></div>
+      <div class="sub"><span class="square"></span>Réponses au formulaire</div>
+    </div>
+    <div class="header-logo"><img src="assets/logo.png" alt="JMMJ Association Culturelle"></div>
+  </header>
+
+  <div class="wrap">
+    <form class="login" id="login">
+      <div class="field">
+        <label for="code">Code d'accès</label>
+        <input type="password" id="code" autocomplete="current-password" autocapitalize="characters" required>
+      </div>
+      <div class="error-box" id="login-error"></div>
+      <button class="btn" type="submit" id="login-btn">Se connecter</button>
+    </form>
+
+    <div id="app" hidden>
+      <div class="stats" id="stats"></div>
+      <div class="toolbar">
+        <input type="search" id="search" placeholder="Rechercher (nom, tél, e-mail)…">
+        <button class="btn" type="button" id="csv">Exporter CSV</button>
+        <button class="btn secondary" type="button" id="refresh">Actualiser</button>
+        <button class="btn secondary" type="button" id="logout">Déconnexion</button>
+      </div>
+      <div class="list" id="list"></div>
+    </div>
+  </div>
+  <div class="footer-band"></div>
+</div>
+
+<script src="config.js"></script>
+<script>
+const LABELS = {
+  cours_hebdo: "Cours hebdomadaires",
+  arabe_intensif: "Arabe intensif / CPF / Démetrias",
+  coran_tajwid: "Coran / Tajwid / Nouraniya",
+  cours_en_ligne: "Cours en ligne",
+};
+const KEY = "jmmj_admin_code";
+const $ = (id) => document.getElementById(id);
+let rows = [];
+
+function storage(action, value) {
+  try {
+    if (action === "get") return sessionStorage.getItem(KEY);
+    if (action === "set") sessionStorage.setItem(KEY, value);
+    if (action === "del") sessionStorage.removeItem(KEY);
+  } catch (_) { return null; }
+}
+
+async function rpc(fn, body) {
+  const { supabaseUrl, supabaseKey } = window.JMMJ_CONFIG;
+  const res = await fetch(`${supabaseUrl}/rest/v1/rpc/${fn}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: supabaseKey },
+    body: JSON.stringify(body),
+  });
+  const text = await res.text();
+  if (!res.ok) {
+    const err = new Error(text);
+    err.badCode = text.includes("code_invalide");
+    throw err;
+  }
+  return text ? JSON.parse(text) : null;
+}
+
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmtDate = (iso) => new Date(iso).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" });
+const fmtBirth = (d) => (d ? d.split("-").reverse().join("/") : "");
+const labels = (arr) => (arr || []).map((v) => LABELS[v] || v);
+
+async function load(code) {
+  rows = await rpc("jmmj_admin_list", { p_code: code });
+  render();
+}
+
+function render() {
+  const q = $("search").value.trim().toLowerCase();
+  const shown = rows.filter((r) => !q || [r.nom_prenom, r.telephone, r.email].join(" ").toLowerCase().includes(q));
+
+  const count = (group, key) => rows.filter((r) => r[group].includes(key)).length;
+  $("stats").innerHTML = [
+    [rows.length, "réponses"],
+    [rows.filter((r) => r.recontact).length, "à recontacter"],
+    ...Object.keys(LABELS).map((k) => [count("pour_vous", k) + count("pour_proches", k), LABELS[k]]),
+  ].map(([n, l]) => `<div class="stat"><b>${n}</b><span>${esc(l)}</span></div>`).join("");
+
+  if (!shown.length) {
+    $("list").innerHTML = `<div class="empty">${rows.length ? "Aucun résultat." : "Aucune réponse pour l'instant."}</div>`;
+    return;
+  }
+  $("list").innerHTML = shown.map((r) => `
+    <div class="card">
+      <div class="card-head">
+        <b>${esc(r.nom_prenom)}</b>
+        <span class="pill ${r.recontact ? "yes" : "no"}">${r.recontact ? "À recontacter" : "Ne pas recontacter"}</span>
+      </div>
+      <time>${fmtDate(r.created_at)}</time>
+      <div>
+        ${r.telephone ? `📞 <a href="tel:${esc(r.telephone)}">${esc(r.telephone)}</a>` : ""}
+        ${r.telephone && r.email ? " · " : ""}
+        ${r.email ? `✉️ <a href="mailto:${esc(r.email)}">${esc(r.email)}</a>` : ""}
+        ${r.date_naissance ? ` · né(e) le ${fmtBirth(r.date_naissance)}` : ""}
+      </div>
+      ${r.pour_vous.length ? `<div class="label-sm" style="margin-top:6px">Pour soi</div><div class="tags">${labels(r.pour_vous).map((l) => `<span class="tag">${esc(l)}</span>`).join("")}</div>` : ""}
+      ${r.pour_proches.length ? `<div class="label-sm" style="margin-top:6px">Pour ses proches</div><div class="tags">${labels(r.pour_proches).map((l) => `<span class="tag red">${esc(l)}</span>`).join("")}</div>` : ""}
+      <button class="del" data-id="${esc(r.id)}" data-name="${esc(r.nom_prenom)}">Supprimer</button>
+    </div>`).join("");
+}
+
+function exportCsv() {
+  const head = ["Date", "Nom Prénom", "Téléphone", "E-mail", "Date de naissance", "Pour soi", "Pour ses proches", "Recontact"];
+  const cell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const lines = [...rows].reverse().map((r) => [
+    fmtDate(r.created_at), r.nom_prenom, r.telephone, r.email, fmtBirth(r.date_naissance),
+    labels(r.pour_vous).join(" | "), labels(r.pour_proches).join(" | "), r.recontact ? "OUI" : "NON",
+  ].map(cell).join(";"));
+  // BOM + « ; » : s'ouvre directement avec les accents dans Excel (FR)
+  const blob = new Blob(["﻿" + [head.map(cell).join(";"), ...lines].join("\r\n")], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `formulaire-jmmj-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function showApp(show) {
+  $("login").hidden = show;
+  $("app").hidden = !show;
+}
+
+$("login").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const code = $("code").value.trim().toUpperCase();
+  $("login-btn").disabled = true;
+  $("login-error").classList.remove("show");
+  try {
+    await load(code);
+    storage("set", code);
+    showApp(true);
+  } catch (err) {
+    $("login-error").textContent = err.badCode ? "Code incorrect." : "Connexion impossible. Réessayez.";
+    $("login-error").classList.add("show");
+  } finally {
+    $("login-btn").disabled = false;
+  }
+});
+
+$("search").addEventListener("input", render);
+$("csv").addEventListener("click", exportCsv);
+$("refresh").addEventListener("click", () => load(storage("get")).catch(() => alert("Actualisation impossible.")));
+$("logout").addEventListener("click", () => { storage("del"); rows = []; $("code").value = ""; showApp(false); });
+$("list").addEventListener("click", async (e) => {
+  const btn = e.target.closest(".del");
+  if (!btn || !confirm(`Supprimer la réponse de ${btn.dataset.name} ?`)) return;
+  const code = storage("get");
+  await rpc("jmmj_admin_delete", { p_code: code, p_id: btn.dataset.id });
+  await load(code);
+});
+
+const saved = storage("get");
+if (saved) load(saved).then(() => showApp(true)).catch(() => storage("del"));
+</script>
+</body>
+</html>
