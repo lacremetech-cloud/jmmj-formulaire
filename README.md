@@ -6,7 +6,8 @@ Formulaire mobile (QR code) + interface admin, stockage dans Supabase (projet pr
 - `admin.html` : réponses, recherche, export CSV (protégé par code) — https://lacremetech-cloud.github.io/jmmj-formulaire/admin.html
 - `config.js` : URL et clé publique Supabase
 - `supabase/migrations/` : schéma `formulaire_jmmj` (table `reponses`) et fonctions `public.jmmj_*`
-- `google-sheets/Code.gs` : synchronisation vers Google Sheets (Apps Script, solution de secours)
+- `api/sheet.js` : export CSV pour Google Sheets (`=IMPORTDATA(".../api/sheet?token=…")`)
+- `google-sheets/Code.gs` : synchro Apps Script (solution de secours)
 - `assets/qr-code-vercel.png` : QR code vers https://jmmj-formulaire.vercel.app/ (et `assets/qr-code-formulaire.png` vers GitHub Pages)
 
 ## Sécurité
