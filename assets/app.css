@@ -134,38 +134,35 @@ button { font: inherit; color: inherit; }
 .note::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #c4c6d6; flex: none; }
 
 /* ---------- Offres ---------- */
-.offers { display: grid; gap: 12px; }
+.offers { display: grid; gap: 10px; }
 .offer {
-  border: 1.5px solid var(--line);
-  border-radius: var(--radius);
-  padding: 14px;
-  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+  display: flex; align-items: center; gap: 14px;
+  width: 100%; padding: 14px; text-align: left;
+  border: 1.5px solid var(--line); border-radius: var(--radius); background: #fff;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s, transform 0.15s;
 }
-.offer.on { border-color: rgba(34, 34, 90, 0.35); box-shadow: 0 8px 24px -14px rgba(34, 34, 90, 0.5); }
-.offer-head { display: flex; gap: 12px; align-items: center; }
+.offer:active { transform: scale(0.985); }
 .offer-icon {
-  width: 44px; height: 44px; flex: none; border-radius: 13px;
+  width: 46px; height: 46px; flex: none; border-radius: 14px;
   display: grid; place-items: center;
   background: var(--red-soft); color: var(--red);
+  transition: background 0.2s, color 0.2s;
 }
 .offer-icon svg { width: 22px; height: 22px; }
-.offer h3 { margin: 0; font-size: 15.5px; font-weight: 700; }
-.offer p { margin: 2px 0 0; font-size: 12.5px; color: var(--muted); }
-.toggles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
-.toggle {
-  display: flex; align-items: center; justify-content: center; gap: 7px;
-  height: 44px; border-radius: 12px;
-  border: 1.5px solid var(--line); background: #fff;
-  font-size: 14px; font-weight: 600; color: var(--muted);
-  cursor: pointer; -webkit-tap-highlight-color: transparent;
-  transition: all 0.2s var(--ease);
+.offer-text { flex: 1; min-width: 0; }
+.offer-text b { display: block; font-size: 15.5px; font-weight: 700; }
+.offer-text small { display: block; margin-top: 2px; font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+.offer .check {
+  width: 26px; height: 26px; flex: none; border-radius: 8px;
+  border: 2px solid #cfd1de; display: grid; place-items: center;
+  color: #fff; transition: all 0.2s var(--ease);
 }
-.toggle svg { width: 16px; height: 16px; }
-.toggle .tick { display: none; }
-.toggle[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); color: #fff; }
-.toggle[aria-pressed="true"] .tick { display: block; }
-.toggle[aria-pressed="true"] .plus { display: none; }
-.toggle:active { transform: scale(0.97); }
+.offer .check svg { width: 15px; height: 15px; opacity: 0; transition: opacity 0.15s; }
+.offer[aria-pressed="true"] { border-color: var(--navy); background: #f7f7fd; box-shadow: 0 8px 24px -14px rgba(34, 34, 90, 0.5); }
+.offer[aria-pressed="true"] .offer-icon { background: var(--navy); color: #fff; }
+.offer[aria-pressed="true"] .check { background: var(--navy); border-color: var(--navy); }
+.offer[aria-pressed="true"] .check svg { opacity: 1; }
 
 /* ---------- Oui / Non ---------- */
 .yesno { display: grid; gap: 10px; }
@@ -236,8 +233,7 @@ button { font: inherit; color: inherit; }
 @keyframes pop { 0% { transform: scale(0.4); opacity: 0; } 70% { transform: scale(1.08); } 100% { transform: scale(1); opacity: 1; } }
 @keyframes draw { to { stroke-dashoffset: 0; } }
 .done h2 { margin: 0 0 8px; font-size: 26px; font-weight: 800; }
-.done p { margin: 0 auto 22px; max-width: 320px; color: var(--muted); line-height: 1.55; }
-.done .link { background: none; border: 0; padding: 8px; font-size: 14px; font-weight: 600; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.done p { margin: 0 auto 6px; max-width: 320px; color: var(--muted); line-height: 1.55; }
 
 .foot { text-align: center; font-size: 12px; color: #9a9db3; margin-top: 20px; }
 

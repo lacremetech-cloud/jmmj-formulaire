@@ -39,7 +39,7 @@ module.exports = async function handler(req, res) {
 
   const labels = (arr) => (arr || []).map((v) => LABELS[v] || v).join(" | ");
   const lines = [
-    ["Date", "Nom Prénom", "Téléphone", "E-mail", "Date de naissance", "Pour soi", "Pour ses proches", "Recontact", "Message"],
+    ["Date", "Nom Prénom", "Téléphone", "E-mail", "Date de naissance", "Intérêts", "Recontact", "Message"],
     ...rows.map((x) => [
       dateFr(x.created_at),
       x.nom_prenom,
@@ -47,7 +47,6 @@ module.exports = async function handler(req, res) {
       x.email,
       x.date_naissance ? x.date_naissance.split("-").reverse().join("/") : "",
       labels(x.pour_vous),
-      labels(x.pour_proches),
       x.recontact ? "OUI" : "NON",
       x.message || "",
     ]),

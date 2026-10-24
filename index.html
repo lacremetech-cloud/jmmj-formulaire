@@ -65,7 +65,7 @@
     <!-- Étape 2 : intérêts -->
     <section class="step" data-step="2">
       <h2>Qu'est-ce qui vous intéresse ?</h2>
-      <p class="lead">Pour vous, ou pour un proche (enfant, famille, ami). Plusieurs choix possibles.</p>
+      <p class="lead">Cochez ce que vous recherchez. Plusieurs choix possibles.</p>
       <div class="offers" id="offers"></div>
     </section>
 
@@ -96,7 +96,6 @@
         <div class="done-badge"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
         <h2>Merci <span id="done-name"></span> !</h2>
         <p id="done-text">Vos informations sont bien enregistrées. Votre quête du savoir continue avec nous : à très bientôt.</p>
-        <button type="button" class="link" id="again">Remplir pour une autre personne</button>
       </div>
     </section>
 
@@ -131,32 +130,24 @@ const OFFERS = [
   { id: "cours_en_ligne", icon: "screen", title: "Cours en ligne", sub: "Arabe · Coran · Éducation · JMMJ en ligne" },
 ];
 const svg = (inner) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
-const PLUS = '<svg class="plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
-const TICK = '<svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 
 const $ = (id) => document.getElementById(id);
-const state = { step: 1, pour_vous: new Set(), pour_proches: new Set(), recontact: null };
+const state = { step: 1, interets: new Set(), recontact: null };
 
 $("offers").innerHTML = OFFERS.map((o) => `
-  <div class="offer" data-offer="${o.id}">
-    <div class="offer-head">
-      <div class="offer-icon">${svg(ICONS[o.icon])}</div>
-      <div><h3>${o.title}</h3><p>${o.sub}</p></div>
-    </div>
-    <div class="toggles">
-      <button type="button" class="toggle" aria-pressed="false" data-group="pour_vous" data-id="${o.id}">${PLUS}${TICK}Pour moi</button>
-      <button type="button" class="toggle" aria-pressed="false" data-group="pour_proches" data-id="${o.id}">${PLUS}${TICK}Pour un proche</button>
-    </div>
-  </div>`).join("");
+  <button type="button" class="offer" aria-pressed="false" data-id="${o.id}">
+    <span class="offer-icon">${svg(ICONS[o.icon])}</span>
+    <span class="offer-text"><b>${o.title}</b><small>${o.sub}</small></span>
+    <span class="check">${TICK}</span>
+  </button>`).join("");
 
 $("offers").addEventListener("click", (e) => {
-  const t = e.target.closest(".toggle");
-  if (!t) return;
-  const set = state[t.dataset.group];
-  set.has(t.dataset.id) ? set.delete(t.dataset.id) : set.add(t.dataset.id);
-  t.setAttribute("aria-pressed", set.has(t.dataset.id));
-  const card = t.closest(".offer");
-  card.classList.toggle("on", !!card.querySelector('[aria-pressed="true"]'));
+  const card = e.target.closest(".offer");
+  if (!card) return;
+  const id = card.dataset.id;
+  state.interets.has(id) ? state.interets.delete(id) : state.interets.add(id);
+  card.setAttribute("aria-pressed", state.interets.has(id));
   navigator.vibrate?.(8);
 });
 
@@ -219,8 +210,7 @@ function renderRecap() {
   const esc = (s) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
   const contact = [$("telephone").value.trim(), $("email").value.trim()].filter(Boolean).map(esc).join(" · ");
   const lines = [];
-  if (state.pour_vous.size) lines.push("Pour moi : " + [...state.pour_vous].map(title).join(", "));
-  if (state.pour_proches.size) lines.push("Pour un proche : " + [...state.pour_proches].map(title).join(", "));
+  if (state.interets.size) lines.push("Intéressé(e) par : " + [...state.interets].map(title).join(", "));
   $("recap").innerHTML = `<b>Récapitulatif</b>${esc($("nom_prenom").value.trim())}<br>${contact}` +
     (lines.length ? "<br>" + lines.join("<br>") : "");
 }
@@ -265,8 +255,7 @@ async function submit() {
     telephone: $("telephone").value.trim(),
     email: $("email").value.trim(),
     date_naissance: readDob().value,
-    pour_vous: [...state.pour_vous],
-    pour_proches: [...state.pour_proches],
+    pour_vous: [...state.interets],
     recontact: state.recontact,
     message: $("message").value.trim(),
   };
@@ -296,16 +285,6 @@ async function submit() {
   }
 }
 
-$("again").addEventListener("click", () => {
-  ["nom_prenom", "telephone", "email", "message"].forEach((id) => ($(id).value = ""));
-  $("message-count").textContent = "0 / 2000";
-  dob.forEach((i) => (i.value = ""));
-  state.pour_vous.clear(); state.pour_proches.clear(); state.recontact = null;
-  document.querySelectorAll(".toggle").forEach((t) => t.setAttribute("aria-pressed", "false"));
-  document.querySelectorAll(".offer").forEach((o) => o.classList.remove("on"));
-  document.querySelectorAll(".yn").forEach((x) => x.setAttribute("aria-checked", "false"));
-  go(1, true);
-});
 </script>
 </body>
 </html>

@@ -138,7 +138,7 @@ function render() {
   $("stats").innerHTML = [
     [rows.length, "réponses"],
     [rows.filter((r) => r.recontact).length, "à recontacter"],
-    ...Object.keys(LABELS).map((k) => [count("pour_vous", k) + count("pour_proches", k), LABELS[k]]),
+    ...Object.keys(LABELS).map((k) => [count("pour_vous", k), LABELS[k]]),
   ].map(([n, l], i) => `<div class="stat${i < 2 ? " hl" : ""}"><b>${n}</b><span>${esc(l)}</span></div>`).join("");
 
   if (!shown.length) {
@@ -158,19 +158,18 @@ function render() {
         ${r.email ? `✉️ <a href="mailto:${esc(r.email)}">${esc(r.email)}</a>` : ""}
         ${r.date_naissance ? ` · né(e) le ${fmtBirth(r.date_naissance)}` : ""}
       </div>
-      ${r.pour_vous.length ? `<div class="label-sm">Pour soi</div><div class="tags">${labels(r.pour_vous).map((l) => `<span class="tag">${esc(l)}</span>`).join("")}</div>` : ""}
-      ${r.pour_proches.length ? `<div class="label-sm">Pour ses proches</div><div class="tags">${labels(r.pour_proches).map((l) => `<span class="tag red">${esc(l)}</span>`).join("")}</div>` : ""}
+      ${r.pour_vous.length ? `<div class="label-sm">Intérêts</div><div class="tags">${labels(r.pour_vous).map((l) => `<span class="tag">${esc(l)}</span>`).join("")}</div>` : ""}
       ${r.message ? `<div class="label-sm">Message</div><div class="msg">${esc(r.message)}</div>` : ""}
       <button class="del" data-id="${esc(r.id)}" data-name="${esc(r.nom_prenom)}">Supprimer</button>
     </div>`).join("");
 }
 
 function exportCsv() {
-  const head = ["Date", "Nom Prénom", "Téléphone", "E-mail", "Date de naissance", "Pour soi", "Pour ses proches", "Recontact", "Message"];
+  const head = ["Date", "Nom Prénom", "Téléphone", "E-mail", "Date de naissance", "Intérêts", "Recontact", "Message"];
   const cell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
   const lines = [...rows].reverse().map((r) => [
     fmtDate(r.created_at), r.nom_prenom, r.telephone, r.email, fmtBirth(r.date_naissance),
-    labels(r.pour_vous).join(" | "), labels(r.pour_proches).join(" | "), r.recontact ? "OUI" : "NON", r.message,
+    labels(r.pour_vous).join(" | "), r.recontact ? "OUI" : "NON", r.message,
   ].map(cell).join(";"));
   // BOM + « ; » : s'ouvre directement avec les accents dans Excel (FR)
   const blob = new Blob(["﻿" + [head.map(cell).join(";"), ...lines].join("\r\n")], { type: "text/csv;charset=utf-8" });

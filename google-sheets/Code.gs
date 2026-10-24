@@ -24,7 +24,7 @@ function synchroJmmj() {
   });
   const rows = JSON.parse(res.getContentText());
   const labels = (arr) => (arr || []).map((v) => LABELS[v] || v).join(' | ');
-  const data = [['Date', 'Nom Prénom', 'Téléphone', 'E-mail', 'Date de naissance', 'Pour soi', 'Pour ses proches', 'Recontact', 'Message']]
+  const data = [['Date', 'Nom Prénom', 'Téléphone', 'E-mail', 'Date de naissance', 'Intérêts', 'Recontact', 'Message']]
     .concat(rows.map((r) => [
       new Date(r.created_at),
       r.nom_prenom,
@@ -32,7 +32,6 @@ function synchroJmmj() {
       r.email || '',
       r.date_naissance ? r.date_naissance.split('-').reverse().join('/') : '',
       labels(r.pour_vous),
-      labels(r.pour_proches),
       r.recontact ? 'OUI' : 'NON',
       r.message || '',
     ]));
