@@ -39,6 +39,9 @@
     .pill.yes { background: #e2f6ec; color: var(--ok); }
     .pill.no { background: var(--field); color: var(--muted); }
     .msg { margin-top: 4px; padding: 10px 12px; border-radius: 12px; background: var(--field); white-space: pre-wrap; word-break: break-word; }
+    .wa { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 12px; height: 44px; border-radius: 12px; background: #25d366; color: #fff !important; font-weight: 700; font-size: 14px; text-decoration: none; }
+    .wa svg { width: 18px; height: 18px; }
+    .wa:active { transform: scale(0.98); }
     .del { background: none; border: 0; color: var(--muted); font-size: 12px; text-decoration: underline; cursor: pointer; padding: 0; margin-top: 10px; }
     .empty { text-align: center; color: var(--muted); padding: 40px 0; grid-column: 1 / -1; }
     .label-sm { font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-top: 10px; }
@@ -120,6 +123,31 @@ async function rpc(fn, body) {
   return text ? JSON.parse(text) : null;
 }
 
+// Message WhatsApp pré-rempli envoyé aux personnes qui ont rempli le formulaire
+const WHATSAPP_MESSAGE = `Salam aleykoum 🌸
+
+Voici les informations pour les cours de JMMJ :
+
+📚 Cours d'islam : lundi, mardi ou mercredi soir, à partir de 18h30, selon l'âge, le niveau et les places disponibles. Pour les plus de 30 ans, les cours ont lieu uniquement le mercredi.
+
+📖 Cours de Coran : dimanche de 18h30 à 20h00.
+
+💶 Tarifs annuels, supports de cours inclus :
+* Islam + Coran : 330 €
+* Islam uniquement : 180 €
+
+📞 Pour les inscriptions, les disponibilités et les horaires précis, contactez directement Ansa Racha à JMMJ au 07 69 96 14 22.`;
+
+// Numéro au format international sans « + » (06… → 336…), attendu par wa.me
+function waNumber(tel) {
+  let n = String(tel || "").replace(/[^0-9+]/g, "");
+  if (n.startsWith("+")) n = n.slice(1);
+  else if (n.startsWith("00")) n = n.slice(2);
+  else if (/^0[1-9]\d{8}$/.test(n)) n = "33" + n.slice(1);
+  return n;
+}
+const waLink = (tel) => `https://wa.me/${waNumber(tel)}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
+
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const fmtDate = (iso) => new Date(iso).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" });
 const fmtBirth = (d) => (d ? d.split("-").reverse().join("/") : "");
@@ -160,6 +188,7 @@ function render() {
       </div>
       ${r.pour_vous.length ? `<div class="label-sm">Intérêts</div><div class="tags">${labels(r.pour_vous).map((l) => `<span class="tag">${esc(l)}</span>`).join("")}</div>` : ""}
       ${r.message ? `<div class="label-sm">Message</div><div class="msg">${esc(r.message)}</div>` : ""}
+      ${r.telephone ? `<a class="wa" href="${waLink(r.telephone)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.4-.5c.2-.2.2-.3.3-.5.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3zM12 21.8c-1.8 0-3.5-.5-5-1.4l-.4-.2-3.7 1 1-3.6-.2-.4A9.8 9.8 0 0 1 2.2 12C2.2 6.6 6.6 2.2 12 2.2S21.8 6.6 21.8 12 17.4 21.8 12 21.8zM12 0C5.4 0 0 5.4 0 12c0 2.1.6 4.2 1.6 6L0 24l6.2-1.6A12 12 0 0 0 24 12C24 5.4 18.6 0 12 0z"/></svg>Envoyer les infos sur WhatsApp</a>` : ""}
       <button class="del" data-id="${esc(r.id)}" data-name="${esc(r.nom_prenom)}">Supprimer</button>
     </div>`).join("");
 }
